@@ -76,10 +76,6 @@ tr.houston-row:hover{background:rgba(240,136,62,.2)}
   <header>
     <h1><span>🎸</span> Tour Tracker</h1>
     <div class="controls">
-      <div class="add-group">
-        <input type="text" id="addArtist" placeholder="Add an artist…" onkeydown="if(event.key==='Enter')addArtist()">
-        <button onclick="addArtist()">+ Add</button>
-      </div>
       <input type="text" id="search" placeholder="Search artists, venues, cities…">
       <button id="houstonBtn" onclick="toggleHoustonFilter()">🤠 Houston Only</button>
       <button id="artistsBtn" onclick="showArtistList()">🎤 My Artists</button>
@@ -123,7 +119,7 @@ function saveArtists() {
   localStorage.setItem(LS_KEY, JSON.stringify(ARTISTS));
 }
 
-async function addArtist() {
+async function addNewArtist() {
   const input = document.getElementById('addArtist');
   const name = input.value.trim();
   if (!name) return;
@@ -131,15 +127,16 @@ async function addArtist() {
   ARTISTS.push(name);
   saveArtists();
   input.value = '';
-  // Fetch just this artist's events and merge
   const events = await fetchArtistEvents(name);
   allEvents.push(...events);
   allEvents.sort((a,b) => {
     if (a._houston !== b._houston) return a._houston ? -1 : 1;
     return new Date(a.datetime) - new Date(b.datetime);
   });
-  renderMainView();
+  showArtistList();
 }
+
+let inArtistList = false;
 
 function removeArtist(name, evt) {
   evt.stopPropagation();
@@ -147,7 +144,8 @@ function removeArtist(name, evt) {
   saveArtists();
   allEvents = allEvents.filter(e => e._artist !== name);
   if (detailArtist === name) detailArtist = null;
-  renderMainView();
+  if (inArtistList) showArtistList();
+  else renderMainView();
 }
 
 const HOUSTON_CITIES = ["houston","sugar land","the woodlands","galveston","kemah",
@@ -223,6 +221,7 @@ async function fetchAllEvents() {
 
 function renderMainView() {
   detailArtist = null;
+  inArtistList = false;
   const q = document.getElementById('search').value.toLowerCase();
   let events = allEvents;
   if (houstonOnly) events = events.filter(e => e._houston);
@@ -302,9 +301,11 @@ function showArtist(name) {
 
 function showArtistList() {
   detailArtist = null;
+  inArtistList = true;
   const sorted = [...ARTISTS].sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
   let html = `<button class="back-btn" onclick="renderMainView()">← Back to events</button>`;
   html += `<div class="artist-list-header"><h2>🎤 My Artists</h2><span>${ARTISTS.length} artists</span></div>`;
+  html += `<div class="add-group" style="margin-bottom:16px"><input type="text" id="addArtist" placeholder="Add an artist…" onkeydown="if(event.key==='Enter')addNewArtist()"><button onclick="addNewArtist()">+ Add</button></div>`;
   html += `<div class="artist-list">`;
   sorted.forEach(name => {
     const events = allEvents.filter(e => e._artist === name);
