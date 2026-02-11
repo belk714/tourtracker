@@ -38,6 +38,8 @@ tr.houston-row{background:var(--houston-bg)}
 tr.houston-row:hover{background:rgba(240,136,62,.2)}
 .artist-name{font-weight:600}
 .venue-name{color:var(--text)}
+.venue-link{color:var(--accent);text-decoration:none;cursor:pointer}
+.venue-link:hover{text-decoration:underline}
 .city-name{color:var(--text2)}
 .date-col{white-space:nowrap}
 .loading{text-align:center;padding:60px 20px;color:var(--text2)}
@@ -173,6 +175,14 @@ function formatDate(dt) {
   return d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
 }
 
+function venueSearchUrl(venue) {
+  const name = venue?.name || '';
+  const city = venue?.city || '';
+  const region = venue?.region || '';
+  const q = encodeURIComponent(`${name} ${city} ${region} events calendar`);
+  return `https://www.google.com/search?q=${q}`;
+}
+
 function formatDateShort(dt) {
   const d = new Date(dt);
   return d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
@@ -259,7 +269,7 @@ function renderMainView() {
     html += `<tr${cls} onclick="showArtist('${e._artist.replace(/'/g,"\\'")}')">
       <td class="artist-name">${esc(e._artist)}<button class="remove-artist" onclick="removeArtist('${e._artist.replace(/'/g,"\\'")}',event)" title="Remove artist">✕</button></td>
       <td class="date-col">${formatDate(e.datetime)}</td>
-      <td class="venue-name hide-mobile">${esc(e.venue?.name||'TBA')}</td>
+      <td class="venue-name hide-mobile"><a class="venue-link" href="${venueSearchUrl(e.venue)}" target="_blank" onclick="event.stopPropagation()">${esc(e.venue?.name||'TBA')}</a></td>
       <td class="city-name">${esc(e.venue?.city||'')}${e.venue?.region?', '+esc(e.venue.region):''}${badge}</td>
     </tr>`;
   });
@@ -286,10 +296,9 @@ function showArtist(name) {
     events.forEach(e => {
       const cls = e._houston ? ' class="houston-row"' : '';
       const badge = e._houston ? ' <span class="badge badge-houston">HTX</span>' : '';
-      const link = e.url ? ` onclick="window.open('${e.url}','_blank');event.stopPropagation()"` : '';
-      html += `<tr${cls}${link} style="cursor:pointer">
-        <td class="date-col">${formatDate(e.datetime)}</td>
-        <td class="venue-name">${esc(e.venue?.name||'TBA')}</td>
+      html += `<tr${cls}>
+        <td class="date-col">${e.url ? `<a class="venue-link" href="${e.url}" target="_blank">${formatDate(e.datetime)}</a>` : formatDate(e.datetime)}</td>
+        <td class="venue-name"><a class="venue-link" href="${venueSearchUrl(e.venue)}" target="_blank">${esc(e.venue?.name||'TBA')}</a></td>
         <td class="city-name">${esc(e.venue?.city||'')}${e.venue?.region?', '+esc(e.venue.region):''}${badge}</td>
       </tr>`;
     });
