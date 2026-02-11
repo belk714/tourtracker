@@ -6,92 +6,69 @@
 <title>Tour Tracker</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0d1117;--card:#161b22;--card-hover:#1c2333;--accent:#58a6ff;--accent2:#f78166;--houston:#3fb950;--text:#e6edf3;--text-dim:#8b949e;--border:#30363d;--radius:12px}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.container{max-width:1200px;margin:0 auto;padding:20px}
-header{text-align:center;padding:32px 0 24px;border-bottom:1px solid var(--border);margin-bottom:24px}
-header h1{font-size:2rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
-header p{color:var(--text-dim);font-size:.95rem}
-.stats{display:flex;gap:16px;justify-content:center;margin-top:16px;flex-wrap:wrap}
-.stat{background:var(--card);padding:8px 18px;border-radius:20px;font-size:.85rem;border:1px solid var(--border)}
-.stat strong{color:var(--accent)}
-.controls{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
-.controls input{flex:1;min-width:200px;padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:.95rem;outline:none}
-.controls input:focus{border-color:var(--accent)}
-.controls select{padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:.95rem;outline:none;cursor:pointer}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.card:hover{background:var(--card-hover);border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
-.card.houston-bound{border-left:3px solid var(--houston)}
-.card h2{font-size:1.1rem;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.badge{font-size:.7rem;padding:3px 8px;border-radius:12px;font-weight:600;white-space:nowrap}
-.badge.houston{background:rgba(63,185,80,.15);color:var(--houston)}
-.badge.no-shows{background:rgba(139,148,158,.15);color:var(--text-dim)}
-.badge.touring{background:rgba(88,166,255,.15);color:var(--accent)}
-.card-info{color:var(--text-dim);font-size:.85rem;line-height:1.6}
-.card-info span{display:block}
-.loading-card{text-align:center;color:var(--text-dim);padding:20px}
-.loading-card .spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--text2:#8b949e;--accent:#58a6ff;--houston:#f0883e;--houston-bg:rgba(240,136,62,.12);--green:#3fb950;--hover:#1c2128}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--accent);text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+h1{font-size:1.4rem;display:flex;align-items:center;gap:8px}
+h1 span{font-size:1.6rem}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+input[type=text]{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:.9rem;width:220px}
+input::placeholder{color:var(--text2)}
+button{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:6px;cursor:pointer;font-size:.85rem;white-space:nowrap}
+button:hover{background:var(--surface2)}
+button.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.stats{font-size:.85rem;color:var(--text2);margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap}
+.stats b{color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.75rem;font-weight:600}
+.badge-houston{background:var(--houston-bg);color:var(--houston)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+thead th{text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);color:var(--text2);font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;background:var(--bg);cursor:pointer;user-select:none}
+tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+tbody tr:hover{background:var(--hover)}
+tbody td{padding:10px 12px}
+tr.houston-row{background:var(--houston-bg)}
+tr.houston-row:hover{background:rgba(240,136,62,.2)}
+.artist-name{font-weight:600}
+.venue-name{color:var(--text)}
+.city-name{color:var(--text2)}
+.date-col{white-space:nowrap}
+.loading{text-align:center;padding:60px 20px;color:var(--text2)}
+.loading .spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.card.error .card-info{color:var(--accent2)}
-
-/* Detail view */
-.detail{display:none}
-.detail.active{display:block}
-.dashboard.hidden{display:none}
-.back-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:.95rem;margin-bottom:20px;transition:all .2s}
-.back-btn:hover{border-color:var(--accent);background:var(--card-hover)}
-.detail-header{margin-bottom:24px}
-.detail-header h2{font-size:1.8rem;margin-bottom:4px}
-.detail-header p{color:var(--text-dim)}
-.event-list{display:flex;flex-direction:column;gap:8px}
-.event-item{display:flex;gap:16px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:8px;align-items:center;flex-wrap:wrap}
-.event-item.houston-event{border-left:3px solid var(--houston);background:rgba(63,185,80,.05)}
-.event-date{min-width:90px;font-weight:600;color:var(--accent);font-size:.9rem;white-space:nowrap}
-.event-venue{flex:1;min-width:150px}
-.event-venue .venue-name{font-size:.95rem}
-.event-venue .venue-city{color:var(--text-dim);font-size:.85rem}
-.no-events{text-align:center;padding:40px;color:var(--text-dim)}
-
-/* Progress bar */
-.progress-bar{width:100%;height:4px;background:var(--border);border-radius:2px;margin-bottom:20px;overflow:hidden}
-.progress-bar .fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s;border-radius:2px}
-
-@media(max-width:600px){
-  .container{padding:12px}
-  header h1{font-size:1.5rem}
-  .grid{grid-template-columns:1fr}
-  .event-item{flex-direction:column;gap:4px}
-  .event-date{min-width:auto}
+.progress-bar{width:100%;height:4px;background:var(--surface);border-radius:2px;margin-bottom:16px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);transition:width .3s;border-radius:2px}
+.back-btn{margin-bottom:12px}
+.detail-header{margin-bottom:16px}
+.detail-header h2{font-size:1.2rem;margin-bottom:4px}
+.detail-header p{color:var(--text2);font-size:.9rem}
+.no-events{text-align:center;padding:40px;color:var(--text2)}
+.pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;margin-left:8px;background:var(--surface2);color:var(--text2)}
+.error-note{color:var(--text2);font-size:.8rem;font-style:italic}
+@media(max-width:700px){
+  input[type=text]{width:100%}
+  .controls{width:100%}
+  table{font-size:.82rem}
+  thead th,tbody td{padding:8px 6px}
+  .hide-mobile{display:none}
 }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>🎸 Tour Tracker</h1>
-    <p>Live tour dates for your favorite artists</p>
-    <div class="stats" id="stats"></div>
-  </header>
-
-  <div class="dashboard" id="dashboard">
-    <div class="progress-bar" id="progressBar" style="display:none"><div class="fill" id="progressFill"></div></div>
+    <h1><span>🎸</span> Tour Tracker</h1>
     <div class="controls">
-      <input type="text" id="search" placeholder="Search artists...">
-      <select id="filter">
-        <option value="all">All Artists</option>
-        <option value="houston">Houston Dates</option>
-        <option value="touring">Currently Touring</option>
-        <option value="no-shows">No Shows</option>
-      </select>
+      <input type="text" id="search" placeholder="Search artists, venues, cities…">
+      <button id="houstonBtn" onclick="toggleHoustonFilter()">🤠 Houston Only</button>
+      <button id="refreshBtn" onclick="fetchAllEvents()">↻ Refresh</button>
     </div>
-    <div class="grid" id="grid"></div>
-  </div>
-
-  <div class="detail" id="detail">
-    <button class="back-btn" onclick="showDashboard()">← Back to All Artists</button>
-    <div class="detail-header" id="detailHeader"></div>
-    <div class="event-list" id="eventList"></div>
+  </header>
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+  <div class="stats" id="stats"></div>
+  <div id="content">
+    <div class="loading"><div class="spinner"></div><br>Loading tour dates…</div>
   </div>
 </div>
 
@@ -99,176 +76,184 @@ header p{color:var(--text-dim);font-size:.95rem}
 const ARTISTS = [
   "Jack Garratt","Dire Straits","Kishi Bashi","Elliott Smith","Jean Dawson",
   "Bombay Bicycle Club","From Indian Lakes","Petey","Minus the Bear","Geese",
-  "Khruangbin","Djo","Tune-Yards","Red Hot Chili Peppers","Mt. Joy","Arm's Length",
-  "Neil Young","Darling Farm","Arc De Soleil","RÜFÜS DU SOL","Bob Dylan",
-  "The War On Drugs","Tom Misch","Peach Pit","Snail Mail","Red Clay Strays",
-  "IDKHow","Dijon","Vince Guaraldi Trio","Chet Faker","Jack Johnson","Paul Simon",
-  "Mo Lowda & the Humble","Palace","Hermanos Gutiérrez","Parcels","Blanco White",
-  "Rainbow Kitten Surprise","The Used","Dispatch","Men I Trust","Radiohead",
-  "Empire of the Sun","Paramore","Kanye West","The 1975","Dave Matthews Band"
+  "Khruangbin","Djo","Tune-Yards","Red Hot Chili Peppers","Mt. Joy",
+  "Arm's Length","Neil Young","Darling Farm","Arc De Soleil","RÜFÜS DU SOL",
+  "Bob Dylan","The War On Drugs","Tom Misch","Peach Pit","Snail Mail",
+  "Red Clay Strays","IDK","Dijon","Vince Guaraldi Trio","Chet Faker",
+  "Jack Johnson","Paul Simon","Mo Lowda & the Humble","Palace",
+  "Hermanos Gutiérrez","Parcels","Blanco White","Rainbow Kitten Surprise",
+  "The Used","Dispatch","Men I Trust","Radiohead","Empire of the Sun",
+  "Paramore","Kanye West","The 1975","Dave Matthews Band"
 ];
 
 const HOUSTON_CITIES = ["houston","sugar land","the woodlands","galveston","kemah",
-  "katy","pearland","pasadena","league city","cypress","spring","humble","baytown",
-  "conroe","texas city","friendswood","missouri city","richmond","rosenberg",
-  "stafford","webster","clear lake","mont belvieu"];
+  "katy","pearland","league city","pasadena","cypress","spring","humble",
+  "baytown","missouri city","richmond","rosenberg","conroe","tomball",
+  "friendswood","webster","clear lake","stafford","bellaire"];
 
-const artistData = {};
+const APP_ID = "squarespace-belk714";
+let allEvents = [];
+let houstonOnly = false;
+let detailArtist = null;
 let loaded = 0;
+let errors = [];
 
-function isHoustonArea(event) {
+function isHouston(event) {
   const city = (event.venue?.city || "").toLowerCase();
   const region = (event.venue?.region || "").toLowerCase();
+  // Must be in Texas first
   if (region !== "tx" && region !== "texas") return false;
   return HOUSTON_CITIES.some(h => city.includes(h));
 }
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+function formatDate(dt) {
+  const d = new Date(dt);
+  return d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
 }
 
-async function fetchArtist(name) {
+function formatDateShort(dt) {
+  const d = new Date(dt);
+  return d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+}
+
+async function fetchArtistEvents(artist) {
+  const url = `https://rest.bandsintown.com/artists/${encodeURIComponent(artist)}/events?app_id=${APP_ID}&date=upcoming`;
   try {
-    const url = `https://rest.bandsintown.com/artists/${encodeURIComponent(name)}/events?app_id=tour-tracker`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const events = await res.json();
-    if (!Array.isArray(events)) throw new Error("Invalid response");
-    const houstonEvents = events.filter(isHoustonArea);
-    artistData[name] = { events, houstonEvents, error: false };
-  } catch (e) {
-    artistData[name] = { events: [], houstonEvents: [], error: true, errorMsg: e.message };
-  }
-  loaded++;
-  updateProgress();
-  renderCard(name);
-}
-
-function updateProgress() {
-  const bar = document.getElementById("progressBar");
-  const fill = document.getElementById("progressFill");
-  const pct = (loaded / ARTISTS.length) * 100;
-  fill.style.width = pct + "%";
-  if (loaded >= ARTISTS.length) {
-    setTimeout(() => { bar.style.display = "none"; updateStats(); sortAndRender(); }, 400);
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`${r.status}`);
+    const data = await r.json();
+    if (!Array.isArray(data)) return [];
+    return data.map(e => ({...e, _artist: artist, _houston: isHouston(e)}));
+  } catch(e) {
+    errors.push({artist, error: e.message});
+    return [];
   }
 }
 
-function updateStats() {
-  const touring = ARTISTS.filter(a => artistData[a]?.events.length > 0).length;
-  const houston = ARTISTS.filter(a => artistData[a]?.houstonEvents.length > 0).length;
-  const total = ARTISTS.reduce((s, a) => s + (artistData[a]?.events.length || 0), 0);
-  document.getElementById("stats").innerHTML =
-    `<span class="stat"><strong>${touring}</strong>&nbsp;Touring</span>` +
-    `<span class="stat" style="border-color:var(--houston)"><strong>${houston}</strong>&nbsp;Coming to Houston</span>` +
-    `<span class="stat"><strong>${total}</strong>&nbsp;Total Shows</span>`;
-}
+async function fetchAllEvents() {
+  allEvents = [];
+  errors = [];
+  loaded = 0;
+  detailArtist = null;
+  document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading tour dates…</div>';
+  document.getElementById('progress').style.width = '0%';
+  document.getElementById('stats').innerHTML = '';
 
-function cardHTML(name) {
-  const d = artistData[name];
-  if (!d) return `<div class="card" id="card-${CSS.escape(name)}"><h2>${name}</h2><div class="loading-card"><span class="spinner"></span>Loading...</div></div>`;
-  const cls = d.houstonEvents.length > 0 ? "card houston-bound" : d.error ? "card error" : "card";
-  let info = "";
-  if (d.error) {
-    info = `<span>Not found on Bandsintown</span>`;
-  } else if (d.events.length === 0) {
-    info = `<span>No upcoming shows</span>`;
-  } else {
-    const next = formatDate(d.events[0].datetime?.split("T")[0] || d.events[0].starts_at);
-    info = `<span>Next: ${next}</span><span>${d.events.length} upcoming show${d.events.length>1?"s":""}</span>`;
-    if (d.houstonEvents.length > 0) {
-      const hDate = formatDate(d.houstonEvents[0].datetime?.split("T")[0] || d.houstonEvents[0].starts_at);
-      info += `<span style="color:var(--houston)">Houston: ${hDate} – ${d.houstonEvents[0].venue?.name||""}</span>`;
-    }
+  // Fetch in batches of 6 to avoid hammering
+  const batch = 6;
+  for (let i = 0; i < ARTISTS.length; i += batch) {
+    const chunk = ARTISTS.slice(i, i + batch);
+    const results = await Promise.all(chunk.map(a => fetchArtistEvents(a)));
+    results.forEach(r => allEvents.push(...r));
+    loaded += chunk.length;
+    document.getElementById('progress').style.width = `${(loaded/ARTISTS.length*100).toFixed(0)}%`;
   }
-  const badges = [];
-  if (d.houstonEvents.length > 0) badges.push('<span class="badge houston">🤠 Houston!</span>');
-  else if (d.events.length > 0) badges.push('<span class="badge touring">On Tour</span>');
-  else if (!d.error) badges.push('<span class="badge no-shows">No Shows</span>');
-  return `<div class="${cls}" onclick="showDetail('${name.replace(/'/g,"\\'")}')" id="card-${CSS.escape(name)}"><h2>${name} ${badges.join("")}</h2><div class="card-info">${info}</div></div>`;
-}
 
-function renderCard(name) {
-  const el = document.querySelector(`[id="card-${CSS.escape(name)}"]`);
-  if (el) el.outerHTML = cardHTML(name);
-}
-
-function getFilteredSorted() {
-  const q = document.getElementById("search").value.toLowerCase();
-  const f = document.getElementById("filter").value;
-  let list = ARTISTS.filter(a => a.toLowerCase().includes(q));
-  if (f === "houston") list = list.filter(a => artistData[a]?.houstonEvents.length > 0);
-  else if (f === "touring") list = list.filter(a => artistData[a]?.events.length > 0);
-  else if (f === "no-shows") list = list.filter(a => artistData[a]&& !artistData[a].error && artistData[a].events.length === 0);
-  // Sort: houston first, then by show count desc, then alpha
-  list.sort((a, b) => {
-    const aH = artistData[a]?.houstonEvents.length > 0 ? 1 : 0;
-    const bH = artistData[b]?.houstonEvents.length > 0 ? 1 : 0;
-    if (bH !== aH) return bH - aH;
-    const aE = artistData[a]?.events.length || 0;
-    const bE = artistData[b]?.events.length || 0;
-    if (bE !== aE) return bE - aE;
-    return a.localeCompare(b);
+  allEvents.sort((a,b) => {
+    if (a._houston !== b._houston) return a._houston ? -1 : 1;
+    return new Date(a.datetime) - new Date(b.datetime);
   });
-  return list;
+
+  renderMainView();
 }
 
-function sortAndRender() {
-  const grid = document.getElementById("grid");
-  grid.innerHTML = getFilteredSorted().map(cardHTML).join("");
-}
+function renderMainView() {
+  detailArtist = null;
+  const q = document.getElementById('search').value.toLowerCase();
+  let events = allEvents;
+  if (houstonOnly) events = events.filter(e => e._houston);
+  if (q) events = events.filter(e =>
+    (e._artist||'').toLowerCase().includes(q) ||
+    (e.venue?.name||'').toLowerCase().includes(q) ||
+    (e.venue?.city||'').toLowerCase().includes(q) ||
+    (e.venue?.location||'').toLowerCase().includes(q)
+  );
 
-function showDetail(name) {
-  const d = artistData[name];
-  if (!d) return;
-  document.getElementById("dashboard").classList.add("hidden");
-  const detail = document.getElementById("detail");
-  detail.classList.add("active");
-  const count = d.events.length;
-  const hCount = d.houstonEvents.length;
-  document.getElementById("detailHeader").innerHTML =
-    `<h2>${name}</h2><p>${count} upcoming show${count!==1?"s":""}`+
-    (hCount > 0 ? ` · <span style="color:var(--houston)">${hCount} in Houston area</span>` : "") +
-    (d.error ? ` · <span style="color:var(--accent2)">Error loading data</span>` : "") + `</p>`;
-  if (count === 0) {
-    document.getElementById("eventList").innerHTML = `<div class="no-events">${d.error ? "Could not load tour data for this artist." : "No upcoming shows found."}</div>`;
+  const houstonCount = allEvents.filter(e => e._houston).length;
+  const artistsWithEvents = new Set(allEvents.map(e => e._artist)).size;
+  const artistsNoEvents = ARTISTS.length - artistsWithEvents;
+
+  document.getElementById('stats').innerHTML = `
+    <span><b>${allEvents.length}</b> events</span>
+    <span><b>${artistsWithEvents}</b> artists touring</span>
+    <span class="badge badge-houston">🤠 ${houstonCount} Houston area</span>
+    ${artistsNoEvents ? `<span>${artistsNoEvents} with no dates</span>` : ''}
+    ${errors.length ? `<span class="error-note">${errors.length} failed to load</span>` : ''}
+  `;
+
+  if (events.length === 0) {
+    document.getElementById('content').innerHTML = '<div class="no-events">No events found</div>';
     return;
   }
-  document.getElementById("eventList").innerHTML = d.events.map(e => {
-    const h = isHoustonArea(e);
-    const date = formatDate(e.datetime?.split("T")[0] || e.starts_at);
-    const venue = e.venue?.name || "TBA";
-    const city = [e.venue?.city, e.venue?.region, e.venue?.country].filter(Boolean).join(", ");
-    return `<div class="event-item${h ? " houston-event" : ""}">
-      <div class="event-date">${date}${h?" 🤠":""}</div>
-      <div class="event-venue"><div class="venue-name">${venue}</div><div class="venue-city">${city}</div></div>
-    </div>`;
-  }).join("");
-  window.scrollTo(0, 0);
+
+  let html = `<table><thead><tr>
+    <th>Artist</th><th>Date</th><th class="hide-mobile">Venue</th><th>City</th>
+  </tr></thead><tbody>`;
+
+  events.forEach(e => {
+    const cls = e._houston ? ' class="houston-row"' : '';
+    const badge = e._houston ? ' <span class="badge badge-houston">HTX</span>' : '';
+    html += `<tr${cls} onclick="showArtist('${e._artist.replace(/'/g,"\\'")}')">
+      <td class="artist-name">${esc(e._artist)}</td>
+      <td class="date-col">${formatDate(e.datetime)}</td>
+      <td class="venue-name hide-mobile">${esc(e.venue?.name||'TBA')}</td>
+      <td class="city-name">${esc(e.venue?.city||'')}${e.venue?.region?', '+esc(e.venue.region):''}${badge}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('content').innerHTML = html;
 }
 
-function showDashboard() {
-  document.getElementById("detail").classList.remove("active");
-  document.getElementById("dashboard").classList.remove("hidden");
-}
+function showArtist(name) {
+  detailArtist = name;
+  const events = allEvents.filter(e => e._artist === name).sort((a,b) => new Date(a.datetime) - new Date(b.datetime));
+  const houstonEvents = events.filter(e => e._houston);
 
-// Init
-const grid = document.getElementById("grid");
-grid.innerHTML = ARTISTS.map(cardHTML).join("");
-document.getElementById("progressBar").style.display = "block";
+  let html = `<button class="back-btn" onclick="renderMainView()">← Back to all events</button>`;
+  html += `<div class="detail-header"><h2>${esc(name)}</h2>`;
+  html += `<p>${events.length} upcoming date${events.length!==1?'s':''}`;
+  if (houstonEvents.length) html += ` · <span class="badge badge-houston">🤠 ${houstonEvents.length} Houston area</span>`;
+  html += `</p></div>`;
 
-// Fetch in batches to avoid hammering API
-async function fetchAll() {
-  const batch = 5;
-  for (let i = 0; i < ARTISTS.length; i += batch) {
-    await Promise.all(ARTISTS.slice(i, i + batch).map(fetchArtist));
+  if (events.length === 0) {
+    html += '<div class="no-events">No upcoming events</div>';
+  } else {
+    html += `<table><thead><tr><th>Date</th><th>Venue</th><th>City</th></tr></thead><tbody>`;
+    events.forEach(e => {
+      const cls = e._houston ? ' class="houston-row"' : '';
+      const badge = e._houston ? ' <span class="badge badge-houston">HTX</span>' : '';
+      const link = e.url ? ` onclick="window.open('${e.url}','_blank');event.stopPropagation()"` : '';
+      html += `<tr${cls}${link} style="cursor:pointer">
+        <td class="date-col">${formatDate(e.datetime)}</td>
+        <td class="venue-name">${esc(e.venue?.name||'TBA')}</td>
+        <td class="city-name">${esc(e.venue?.city||'')}${e.venue?.region?', '+esc(e.venue.region):''}${badge}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
   }
-}
-fetchAll();
 
-document.getElementById("search").addEventListener("input", sortAndRender);
-document.getElementById("filter").addEventListener("change", sortAndRender);
+  document.getElementById('content').innerHTML = html;
+}
+
+function toggleHoustonFilter() {
+  houstonOnly = !houstonOnly;
+  document.getElementById('houstonBtn').classList.toggle('active', houstonOnly);
+  if (detailArtist) showArtist(detailArtist); else renderMainView();
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+document.getElementById('search').addEventListener('input', () => {
+  if (detailArtist) { detailArtist = null; }
+  renderMainView();
+});
+
+fetchAllEvents();
 </script>
 </body>
 </html>
