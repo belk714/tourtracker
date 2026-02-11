@@ -107,20 +107,21 @@ const DEFAULT_ARTISTS = [
   "Paramore","Kanye West","The 1975","Dave Matthews Band"
 ];
 
-const LS_KEY = 'tourTrackerArtists';
-let ARTISTS = loadArtists();
+const REPO_URL = 'https://raw.githubusercontent.com/belk714/tourtracker/main/artists.json';
+let ARTISTS = [...DEFAULT_ARTISTS];
 
-function loadArtists() {
+async function loadArtistsFromRepo() {
   try {
-    const saved = localStorage.getItem(LS_KEY);
-    if (saved) { const arr = JSON.parse(saved); if (Array.isArray(arr) && arr.length) return arr; }
+    const r = await fetch(REPO_URL + '?t=' + Date.now());
+    if (r.ok) {
+      const data = await r.json();
+      if (Array.isArray(data) && data.length) {
+        ARTISTS = data;
+        return;
+      }
+    }
   } catch(e) {}
-  localStorage.setItem(LS_KEY, JSON.stringify(DEFAULT_ARTISTS));
-  return [...DEFAULT_ARTISTS];
-}
-
-function saveArtists() {
-  localStorage.setItem(LS_KEY, JSON.stringify(ARTISTS));
+  ARTISTS = [...DEFAULT_ARTISTS];
 }
 
 async function addNewArtist() {
@@ -129,7 +130,6 @@ async function addNewArtist() {
   if (!name) return;
   if (ARTISTS.some(a => a.toLowerCase() === name.toLowerCase())) { input.value = ''; return; }
   ARTISTS.push(name);
-  saveArtists();
   input.value = '';
   const events = await fetchArtistEvents(name);
   allEvents.push(...events);
@@ -145,7 +145,6 @@ let inArtistList = false;
 function removeArtist(name, evt) {
   evt.stopPropagation();
   ARTISTS = ARTISTS.filter(a => a !== name);
-  saveArtists();
   allEvents = allEvents.filter(e => e._artist !== name);
   if (detailArtist === name) detailArtist = null;
   if (inArtistList) showArtistList();
@@ -365,7 +364,10 @@ document.getElementById('search').addEventListener('input', () => {
   renderMainView();
 });
 
-fetchAllEvents();
+(async () => {
+  await loadArtistsFromRepo();
+  fetchAllEvents();
+})();
 </script>
 </body>
 </html>
