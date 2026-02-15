@@ -316,10 +316,12 @@ function showArtist(name) {
   const events = allEvents.filter(e => e._artist === name).sort((a,b) => new Date(a.datetime) - new Date(b.datetime));
   const houstonEvents = events.filter(e => e._houston);
 
+  const spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(name)}`;
   let html = `<button class="back-btn" onclick="renderMainView()">← Back to all events</button>`;
   html += `<div class="detail-header"><h2>${esc(name)}</h2>`;
   html += `<p>${events.length} upcoming date${events.length!==1?'s':''}`;
   if (houstonEvents.length) html += ` · <span class="badge badge-houston">🤠 ${houstonEvents.length} Houston area</span>`;
+  html += ` · <a href="${spotifyUrl}" target="_blank" style="color:#1DB954;text-decoration:none;font-weight:600">🎧 Spotify</a>`;
   html += `</p></div>`;
 
   if (events.length === 0) {
@@ -355,9 +357,13 @@ function showArtistList() {
     const info = events.length ? `${events.length} show${events.length!==1?'s':''}` : 'No shows';
     const htx = houstonEvents.length ? ` · <span class="badge badge-houston">HTX</span>` : '';
     const img = artistImages[name] ? `<img class="artist-thumb" src="${artistImages[name]}" alt="" onerror="this.style.display='none'">` : `<div class="artist-thumb"></div>`;
+    const spotUrl = `https://open.spotify.com/search/${encodeURIComponent(name)}`;
     html += `<div class="artist-list-item" onclick="showArtist('${name.replace(/'/g,"\\'")}')">
       <div class="left">${img}<div><div class="name">${esc(name)}</div><div class="info">${info}${htx}</div></div></div>
-      <button class="remove-x" onclick="removeArtist('${name.replace(/'/g,"\\'")}',event)" title="Remove">✕</button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <a href="${spotUrl}" target="_blank" onclick="event.stopPropagation()" style="color:#1DB954;font-size:.85rem;text-decoration:none;opacity:.6;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6" title="Open in Spotify">🎧</a>
+        <button class="remove-x" onclick="removeArtist('${name.replace(/'/g,"\\'")}',event)" title="Remove">✕</button>
+      </div>
     </div>`;
   });
   html += `</div>`;
