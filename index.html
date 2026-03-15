@@ -71,6 +71,14 @@ tr.houston-row:hover{background:rgba(240,136,62,.2)}
 .artist-list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .artist-list-header h2{font-size:1.2rem}
 .artist-list-header span{color:var(--text2);font-size:.85rem}
+:root{--redrocks:#e05555;--redrocks-bg:rgba(224,85,85,.12);--genre:#9d7cd8;--genre-bg:rgba(157,124,216,.12)}
+.badge-redrocks{background:var(--redrocks-bg);color:var(--redrocks)}
+.badge-genre{background:var(--genre-bg);color:var(--genre)}
+tr.rr-onlist{background:var(--redrocks-bg)}
+tr.rr-onlist:hover{background:rgba(224,85,85,.2)}
+tr.rr-genre{background:var(--genre-bg)}
+tr.rr-genre:hover{background:rgba(157,124,216,.2)}
+.rr-updated{font-size:.75rem;color:var(--text2);margin-bottom:12px;font-style:italic}
 @media(max-width:700px){
   input[type=text]{width:100%}
   .controls{width:100%}
@@ -88,6 +96,7 @@ tr.houston-row:hover{background:rgba(240,136,62,.2)}
       <input type="text" id="search" placeholder="Search artists, venues, cities…">
       <button id="houstonBtn" onclick="toggleHoustonFilter()">🤠 Houston Only</button>
       <button id="artistsBtn" onclick="showArtistList()">🎤 My Artists</button>
+      <button id="redRocksBtn" onclick="showRedRocks()">🏔️ Red Rocks</button>
       <button id="refreshBtn" onclick="fetchAllEvents()">↻ Refresh</button>
     </div>
   </header>
@@ -385,6 +394,250 @@ function esc(s) {
 document.getElementById('search').addEventListener('input', () => {
   if (detailArtist) { detailArtist = null; }
   renderMainView();
+});
+
+// Red Rocks events (scraped from redrocksonline.com)
+const RED_ROCKS_EVENTS = [
+  {date:"2026-03-27",artist:"CRANKDAT",support:"Dr. Fresch, Smoakland, Capochino, HerShe",url:"https://www.redrocksonline.com/events/crankdat-1206221/"},
+  {date:"2026-03-28",artist:"Ravenscoon & Jantsen",support:"WonkyWilla, Jason Leech, CHOZEN b2b Noetika, DEV",url:"https://www.redrocksonline.com/events/ravenscoon-jantsen-1160134/"},
+  {date:"2026-04-03",artist:"INZO",support:"What So Not, Lumasi, Daggz, Common Creation, Spenny",url:"https://www.redrocksonline.com/events/inzo-1157069/"},
+  {date:"2026-04-04",artist:"it's murph",support:"D.O.D, oskar med k, me n ü",url:"https://www.redrocksonline.com/events/its-murph-1160184/"},
+  {date:"2026-04-10",artist:"ZINGARA & LEVEL UP",support:"Saka, SubDocta, Slang Dogs",url:"https://www.redrocksonline.com/events/zingara-level-up-1240608/"},
+  {date:"2026-04-11",artist:"Liquid Stranger",support:"TVBOO b2b AHEE, AVELLO, HAIRITAGE, Ozztin",url:"https://www.redrocksonline.com/events/wakaan-rocks-liquid-stranger-1191989/"},
+  {date:"2026-04-15",artist:"John Mulaney",support:"",url:"https://www.redrocksonline.com/events/john-mulaney-mister-whatever-1183928/"},
+  {date:"2026-04-16",artist:"bbno$",support:"Oliver Tree, Kaarija, YNG Martyr, Jungle Bobby",url:"https://www.redrocksonline.com/events/bbno-w-special-guest-oliver-tree-1180778/"},
+  {date:"2026-04-17",artist:"Sublime",support:"Common Kings, Bumpin Uglies, Fayuca",url:"https://www.redrocksonline.com/events/sublime-1213690/"},
+  {date:"2026-04-18",artist:"Sublime",support:"Pepper, Codefendants",url:"https://www.redrocksonline.com/events/sublime-1213695/"},
+  {date:"2026-04-19",artist:"Wiz Khalifa",support:"2 Chainz, Berner, The Underachievers, Chevy Woods",url:"https://www.redrocksonline.com/events/wiz-khalifa-1188439/"},
+  {date:"2026-04-20",artist:"Ice Cube",support:"Czarface",url:"https://www.redrocksonline.com/events/ice-cube-1231930/"},
+  {date:"2026-04-21",artist:"Ethel Cain",support:"9Million",url:"https://www.redrocksonline.com/events/ethel-cain-1145150/"},
+  {date:"2026-04-22",artist:"Dustin Lynch & Chase Rice",support:"",url:"https://www.redrocksonline.com/events/dustin-lynch-chase-rice-1312632/"},
+  {date:"2026-04-23",artist:"Subtronics",support:"Hedex, Cyclops, Mythm, Gardella, St. Mary",url:"https://www.redrocksonline.com/events/subtronics-1267604/"},
+  {date:"2026-04-24",artist:"Subtronics",support:"KOAN Sound, Effin, DENNETT, Rohaan, KLO",url:"https://www.redrocksonline.com/events/subtronics-1267622/"},
+  {date:"2026-04-25",artist:"Alesso",support:"Lost Frequencies, Surf Mesa",url:"https://www.redrocksonline.com/events/alesso-1312610/"},
+  {date:"2026-04-26",artist:"Bob Moses & Cannons",support:"",url:"https://www.redrocksonline.com/events/bob-moses-cannons-1181983/"},
+  {date:"2026-04-28",artist:"Lewis Capaldi",support:"Joy Crookes",url:"https://www.redrocksonline.com/events/lewis-capaldi-1195851/"},
+  {date:"2026-04-29",artist:"Lewis Capaldi",support:"Joy Crookes",url:"https://www.redrocksonline.com/events/lewis-capaldi-1195855/"},
+  {date:"2026-04-30",artist:"Electric Callboy",support:"Polaris, Scene Queen",url:"https://www.redrocksonline.com/events/electric-callboy-tanzneid-world-tour-1183924/"},
+  {date:"2026-05-01",artist:"Two Friends",support:"ARMNHMR, Leondis",url:"https://www.redrocksonline.com/events/two-friends-1221476/"},
+  {date:"2026-05-02",artist:"Jason Isbell and the 400 Unit",support:"Gillian Welch & David Rawlings",url:"https://www.redrocksonline.com/events/jason-isbell-and-the-400-unit-1191541/"},
+  {date:"2026-05-03",artist:"Puscifer",support:"Dave Hill",url:"https://www.redrocksonline.com/events/puscifer-1180699/"},
+  {date:"2026-05-05",artist:"David Guetta",support:"Miss Monique",url:"https://www.redrocksonline.com/events/david-guetta-1294396/"},
+  {date:"2026-05-06",artist:"Bright Eyes",support:"",url:"https://www.redrocksonline.com/events/bright-eyes-y-21-years-of-wide-awake-digital-ash-1243458/"},
+  {date:"2026-05-07",artist:"Alejandro Fernández",support:"Camila Fernández",url:"https://www.redrocksonline.com/events/alejandro-fernandez-de-rey-a-rey-1216431/"},
+  {date:"2026-05-09",artist:"Cloonee",support:"KETTAMA, Omar+, Cole Knight",url:"https://www.redrocksonline.com/events/cloonee-1198664/"},
+  {date:"2026-05-10",artist:"Hippie Sabotage",support:"Danny Brown, Kembe X",url:"https://www.redrocksonline.com/events/hippie-sabotage-1259262/"},
+  {date:"2026-05-11",artist:"YUNGBLUD",support:"Return To Dust",url:"https://www.redrocksonline.com/events/yungblud-idols-the-world-tour-1165461/"},
+  {date:"2026-05-16",artist:"LSDREAM",support:"Elohim, Steller, Seth David, Cam Steen",url:"https://www.redrocksonline.com/events/lsdream-presents-dreamrocks-ii-1215548/"},
+  {date:"2026-05-17",artist:"THE ELOVATERS",support:"Collie Buddz, The Hip Abduction, Protoje, Donavon Frankenreiter",url:"https://www.redrocksonline.com/events/the-elovaters-1215487/"},
+  {date:"2026-05-18",artist:"Khalid",support:"Lauv",url:"https://www.redrocksonline.com/events/khalid-1252029/"},
+  {date:"2026-05-19",artist:"Kevin Gates",support:"Shoreline Mafia, Ty Dolla $ign",url:"https://www.redrocksonline.com/events/kevin-gates-1263084/"},
+  {date:"2026-05-21",artist:"flipturn",support:"Richy Mitch & The Coal Miners",url:"https://www.redrocksonline.com/events/flipturn-1238320/"},
+  {date:"2026-05-22",artist:"Seven Lions",support:"MitiS B2B Trivecta, Kill the Noise, HVDES, Quackson",url:"https://www.redrocksonline.com/events/seven-lions-1165951/"},
+  {date:"2026-05-23",artist:"FISHER",support:"",url:"https://www.redrocksonline.com/events/fisher-1234299/"},
+  {date:"2026-05-24",artist:"Alabama Shakes",support:"JJ Grey & Mofro",url:"https://www.redrocksonline.com/events/alabama-shakes-1247391/"},
+  {date:"2026-05-25",artist:"Alabama Shakes",support:"JJ Grey & Mofro",url:"https://www.redrocksonline.com/events/alabama-shakes-1247396/"},
+  {date:"2026-05-27",artist:"Santana",support:"",url:"https://www.redrocksonline.com/events/santana-oneness-tour-2026-1333318/"},
+  {date:"2026-05-28",artist:"Santana",support:"",url:"https://www.redrocksonline.com/events/santana-oneness-tour-2026-1333321/"},
+  {date:"2026-05-29",artist:"Michael Franti & Spearhead",support:"The Original Wailers",url:"https://www.redrocksonline.com/events/michael-franti-spearhead-1228317/"},
+  {date:"2026-05-30",artist:"Alan Walker",support:"Audien",url:"https://www.redrocksonline.com/events/alan-walker-1223683/"},
+  {date:"2026-06-02",artist:"Alex Warren",support:"",url:"https://www.redrocksonline.com/events/alex-warren-little-orphan-alex-live-1228320/"},
+  {date:"2026-06-03",artist:"Yo-Yo Ma",support:"Colorado Symphony",url:"https://www.redrocksonline.com/events/yo-yo-ma-with-the-colorado-symphony-1297726/"},
+  {date:"2026-06-04",artist:"Brit Floyd",support:"",url:"https://www.redrocksonline.com/events/brit-floyd-1184040/"},
+  {date:"2026-06-05",artist:"Brit Floyd",support:"",url:"https://www.redrocksonline.com/events/brit-floyd-1198180/"},
+  {date:"2026-06-06",artist:"Big Head Todd and the Monsters",support:"4 Non Blondes",url:"https://www.redrocksonline.com/events/big-head-todd-and-the-monsters-1247138/"},
+  {date:"2026-06-07",artist:"Trey Anastasio",support:"Colorado Symphony",url:"https://www.redrocksonline.com/events/trey-anastasio-with-colorado-symphony-1297775/"},
+  {date:"2026-06-09",artist:"Jimmy Eat World",support:"Sunny Day Real Estate, The Get Up Kids",url:"https://www.redrocksonline.com/events/jimmy-eat-world-1324697/"},
+  {date:"2026-06-10",artist:"Lord Huron",support:"",url:"https://www.redrocksonline.com/events/lord-huron-1253323/"},
+  {date:"2026-06-11",artist:"Jon Bellion",support:"",url:"https://www.redrocksonline.com/events/jon-bellion-1337349/"},
+  {date:"2026-06-12",artist:"Paul Simon",support:"",url:"https://www.redrocksonline.com/events/paul-simon-1317619/"},
+  {date:"2026-06-13",artist:"Paul Simon",support:"",url:"https://www.redrocksonline.com/events/paul-simon-1317635/"},
+  {date:"2026-06-14",artist:"Trevor Hall, Thievery Corporation, & Dirtwire",support:"Poranguí",url:"https://www.redrocksonline.com/events/trevor-hall-thievery-corporation-dirtwire-1247260/"},
+  {date:"2026-06-15",artist:"Rod Stewart",support:"Richard Marx",url:"https://www.redrocksonline.com/events/rod-stewart-1215549/"},
+  {date:"2026-06-16",artist:"Rod Stewart",support:"Richard Marx",url:"https://www.redrocksonline.com/events/rod-stewart-one-last-time-1216092/"},
+  {date:"2026-06-17",artist:"Amyl and The Sniffers",support:"L7, PARTY DOZEN",url:"https://www.redrocksonline.com/events/amyl-and-the-sniffers-1237634/"},
+  {date:"2026-06-19",artist:"Louis Tomlinson",support:"The Aces",url:"https://www.redrocksonline.com/events/louis-tomlinson-1160771/"},
+  {date:"2026-06-20",artist:"O.A.R.",support:"Gavin DeGraw, Phantom Planet",url:"https://www.redrocksonline.com/events/o-a-r-1192930/"},
+  {date:"2026-06-23",artist:"\"Weird Al\" Yankovic",support:"Puddles Pity Party",url:"https://www.redrocksonline.com/events/weird-al-yankovic-1216441/"},
+  {date:"2026-06-24",artist:"Ziggy Marley & Stephen Marley",support:"Buju Banton, Karl Denson's Tiny Universe",url:"https://www.redrocksonline.com/events/ziggy-marley-stephen-marley-1317762/"},
+  {date:"2026-06-25",artist:"Dirty Heads",support:"honestav, Satsang",url:"https://www.redrocksonline.com/events/dirty-heads-1326856/"},
+  {date:"2026-06-26",artist:"Widespread Panic",support:"",url:"https://www.redrocksonline.com/events/widespread-panic-1352789/"},
+  {date:"2026-06-27",artist:"Widespread Panic",support:"",url:"https://www.redrocksonline.com/events/widespread-panic-1352799/"},
+  {date:"2026-06-28",artist:"Widespread Panic",support:"",url:"https://www.redrocksonline.com/events/widespread-panic-1352800/"},
+  {date:"2026-06-29",artist:"AJR",support:"",url:"https://www.redrocksonline.com/events/ajr-1342754/"},
+  {date:"2026-06-30",artist:"AJR",support:"",url:"https://www.redrocksonline.com/events/ajr-1343786/"},
+  {date:"2026-07-01",artist:"Treaty Oak Revival",support:"William Clark Green, Gannon Fremin & CCREV",url:"https://www.redrocksonline.com/events/treaty-oak-revival-1240574/"},
+  {date:"2026-07-02",artist:"Zeds Dead",support:"",url:"https://www.redrocksonline.com/events/deadrocks-xii-with-zeds-dead-1270763/"},
+  {date:"2026-07-03",artist:"Zeds Dead",support:"",url:"https://www.redrocksonline.com/events/deadrocks-xii-with-zeds-dead-1270801/"},
+  {date:"2026-07-04",artist:"Blues Traveler",support:"Better Than Ezra, The Record Company",url:"https://www.redrocksonline.com/events/blues-traveler-1342092/"},
+  {date:"2026-07-10",artist:"The Avett Brothers",support:"",url:"https://www.redrocksonline.com/events/the-avett-brothers-1247140/"},
+  {date:"2026-07-11",artist:"The Avett Brothers",support:"Asleep At The Wheel",url:"https://www.redrocksonline.com/events/the-avett-brothers-1247249/"},
+  {date:"2026-07-12",artist:"The Avett Brothers",support:"Graham Nash",url:"https://www.redrocksonline.com/events/the-avett-brothers-1247252/"},
+  {date:"2026-07-14",artist:"KALEO",support:"Elle King",url:"https://www.redrocksonline.com/events/kaleo-with-very-special-guest-elle-king-1287812/"},
+  {date:"2026-07-15",artist:"The Head And The Heart",support:"Colorado Symphony, Evan Honer",url:"https://www.redrocksonline.com/events/the-head-and-the-heart-with-the-colorado-symphony-1216455/"},
+  {date:"2026-07-16",artist:"The Head And The Heart",support:"Wilderado",url:"https://www.redrocksonline.com/events/the-head-and-the-heart-1216462/"},
+  {date:"2026-07-17",artist:"The String Cheese Incident",support:"Clay Street Unit",url:"https://www.redrocksonline.com/events/the-string-cheese-incident-1249068/"},
+  {date:"2026-07-18",artist:"The String Cheese Incident",support:"",url:"https://www.redrocksonline.com/events/the-string-cheese-incident-1249298/"},
+  {date:"2026-07-19",artist:"Maren Morris",support:"Colorado Symphony, The Highwomen",url:"https://www.redrocksonline.com/events/maren-morris-with-the-colorado-symphony-joined-by-the-highwomen-1355603/"},
+  {date:"2026-07-20",artist:"Hilary Duff",support:"La Roux, Jade LeMac",url:"https://www.redrocksonline.com/events/hilary-duff-1328065/"},
+  {date:"2026-07-24",artist:"Cross Canadian Ragweed",support:"The Smokin Oaks, Waves in April",url:"https://www.redrocksonline.com/events/cross-canadian-ragweed-1322110/"},
+  {date:"2026-07-25",artist:"Darius Rucker",support:"Old Crow Medicine Show, Austin Williams",url:"https://www.redrocksonline.com/events/darius-rucker-songs-of-summer-tour-2026-1342740/"},
+  {date:"2026-07-28",artist:"Sarah McLachlan",support:"Allison Russell",url:"https://www.redrocksonline.com/events/sarah-mclachlan-1326881/"},
+  {date:"2026-07-29",artist:"Parker McCollum",support:"Gary Allan, Josh Abbott Band",url:"https://www.redrocksonline.com/events/parker-mccollum-1216490/"},
+  {date:"2026-07-30",artist:"Killer Queen",support:"",url:"https://www.redrocksonline.com/events/killer-queen-1165958/"},
+  {date:"2026-07-31",artist:"Tedeschi Trucks Band",support:"Lukas Nelson",url:"https://www.redrocksonline.com/events/tedeschi-trucks-band-1303195/"},
+  {date:"2026-08-01",artist:"Tedeschi Trucks Band",support:"Lukas Nelson",url:"https://www.redrocksonline.com/events/tedeschi-trucks-band-1303204/"},
+  {date:"2026-08-02",artist:"Wynonna Judd & Melissa Etheridge",support:"Colorado Symphony",url:"https://www.redrocksonline.com/events/wynonna-judd-melissa-etheridge-with-the-colorado-symphony-1351174/"},
+  {date:"2026-08-08",artist:"Slightly Stoopid",support:"The Movement, Pepper",url:"https://www.redrocksonline.com/events/slightly-stoopid-1266239/"},
+  {date:"2026-08-09",artist:"Motionless In White",support:"Lorna Shore, Fit for a King, Static Dress",url:"https://www.redrocksonline.com/events/motionless-in-white-1317671-2/"},
+  {date:"2026-08-11",artist:"Empire Of The Sun",support:"",url:"https://www.redrocksonline.com/events/empire-of-the-sun-ask-that-god-afterlife-north-american-tour-1367724/"},
+  {date:"2026-08-13",artist:"Mt. Joy",support:"Leif Vollebekk, Arcy Drive",url:"https://www.redrocksonline.com/events/mt-joy-1232801/"},
+  {date:"2026-08-14",artist:"Mt. Joy",support:"Leif Vollebekk, Arcy Drive",url:"https://www.redrocksonline.com/events/mt-joy-1232806/"},
+  {date:"2026-08-17",artist:"Train",support:"",url:"https://www.redrocksonline.com/events/train-drops-of-jupiter-25-years-in-the-atmosphere-1216432/"},
+  {date:"2026-08-20",artist:"Tori Amos",support:"Bartees Strange",url:"https://www.redrocksonline.com/events/tori-amos-in-times-of-dragons-tour-1273581/"},
+  {date:"2026-08-21",artist:"Grupo Frontera",support:"",url:"https://www.redrocksonline.com/events/grupo-frontera-1357846/"},
+  {date:"2026-08-22",artist:"Reggae on the Rocks",support:"Rebelution, MAOLI, Skip Marley, Third World, Etana",url:"https://www.redrocksonline.com/events/reggae-on-the-rocks-2026-1313694/"},
+  {date:"2026-08-23",artist:"Joe Bonamassa",support:"",url:"https://www.redrocksonline.com/events/joe-bonamassa-1240606/"},
+  {date:"2026-08-25",artist:"Ian Munsick",support:"ERNEST, Ned LeDoux",url:"https://www.redrocksonline.com/events/ian-munsick-1294402/"},
+  {date:"2026-08-26",artist:"Ray LaMontagne",support:"The Weather Station",url:"https://www.redrocksonline.com/events/ray-lamontagne-841147/"},
+  {date:"2026-08-27",artist:"Goose",support:"",url:"https://www.redrocksonline.com/events/an-evening-with-goose-1305340/"},
+  {date:"2026-08-28",artist:"Goose",support:"",url:"https://www.redrocksonline.com/events/an-evening-with-goose-1307890/"},
+  {date:"2026-09-04",artist:"MANÁ",support:"",url:"https://www.redrocksonline.com/events/mana-1240795/"},
+  {date:"2026-09-05",artist:"MANÁ",support:"",url:"https://www.redrocksonline.com/events/mana-1240807/"},
+  {date:"2026-09-06",artist:"Gregory Alan Isakov",support:"Colorado Symphony",url:"https://www.redrocksonline.com/events/gregory-alan-isakov-1216931/"},
+  {date:"2026-09-07",artist:"Gregory Alan Isakov",support:"Colorado Symphony",url:"https://www.redrocksonline.com/events/gregory-alan-isakov-1217861/"},
+  {date:"2026-09-08",artist:"Five Finger Death Punch",support:"Cody Jinks, Eva Under Fire",url:"https://www.redrocksonline.com/events/five-finger-death-punch-1286674/"},
+  {date:"2026-09-09",artist:"Cole Swindell",support:"BlackHawk, Zach John King",url:"https://www.redrocksonline.com/events/cole-swindell-1336373/"},
+  {date:"2026-09-11",artist:"Brandi Carlile",support:"Stephen Wilson Jr.",url:"https://www.redrocksonline.com/events/brandi-carlile-1360444/"},
+  {date:"2026-09-12",artist:"Brandi Carlile",support:"Stephen Wilson Jr.",url:"https://www.redrocksonline.com/events/brandi-carlile-1360445/"},
+  {date:"2026-09-13",artist:"Brandi Carlile",support:"Stephen Wilson Jr.",url:"https://www.redrocksonline.com/events/brandi-carlile-1360450/"},
+  {date:"2026-09-14",artist:"NEEDTOBREATHE",support:"Drew & Ellie Holcomb",url:"https://www.redrocksonline.com/events/needtobreathe-1370134/"},
+  {date:"2026-09-17",artist:"Get The Led Out",support:"",url:"https://www.redrocksonline.com/events/get-the-led-out-1165966/"},
+  {date:"2026-09-20",artist:"Andrea Bocelli",support:"",url:"https://www.redrocksonline.com/events/andrea-bocelli-1304787/"},
+  {date:"2026-09-21",artist:"Andrea Bocelli",support:"",url:"https://www.redrocksonline.com/events/andrea-bocelli-1304810/"},
+  {date:"2026-09-23",artist:"Bleachers",support:"American Football",url:"https://www.redrocksonline.com/events/bleachers-forever-1366035/"},
+  {date:"2026-09-25",artist:"The Revivalists",support:"Ax and the Hatchetmen",url:"https://www.redrocksonline.com/events/the-revivalists-1342115/"},
+  {date:"2026-10-02",artist:"Levity presents LEVI-ROCKS",support:"",url:"https://www.redrocksonline.com/events/levity-1351306/"},
+  {date:"2026-10-03",artist:"REZZ",support:"Frost Children, Kavari, Izzy Camina, Sakr",url:"https://www.redrocksonline.com/events/rezz-rocks-viii-1303156/"},
+  {date:"2026-10-06",artist:"Big Thief",support:"",url:"https://www.redrocksonline.com/events/big-thief-1364342/"},
+  {date:"2026-10-08",artist:"Tape B",support:"",url:"https://www.redrocksonline.com/events/tape-b-presents-hallow-rocks-1315398/"},
+  {date:"2026-10-09",artist:"Tape B",support:"",url:"https://www.redrocksonline.com/events/tape-b-presents-hallow-rocks-1315400/"},
+  {date:"2026-10-16",artist:"Sammy Virji",support:"Confidence Man, Oppidan, Sam Alfred",url:"https://www.redrocksonline.com/events/sammy-virji-1330899/"},
+  {date:"2026-10-18",artist:"Matt Rife",support:"",url:"https://www.redrocksonline.com/events/matt-rife-stay-golden-world-tour-1216495/"},
+  {date:"2026-10-19",artist:"Zac Brown Band",support:"Grace Potter",url:"https://www.redrocksonline.com/events/zac-brown-band-1307876/"},
+  {date:"2026-10-20",artist:"Zac Brown Band",support:"Grace Potter",url:"https://www.redrocksonline.com/events/zac-brown-band-1307879/"},
+  {date:"2026-10-23",artist:"Mersiv",support:"",url:"https://www.redrocksonline.com/events/mersiv-1247239/"},
+  {date:"2026-10-25",artist:"Stardew Valley: Symphony of Seasons",support:"",url:"https://www.redrocksonline.com/events/stardew-valley-symphony-of-seasons-1341018/"},
+  {date:"2026-10-26",artist:"Evanescence",support:"K. Flay",url:"https://www.redrocksonline.com/events/evanescence-1240978/"},
+  {date:"2026-10-27",artist:"Tucker Wetmore",support:"",url:"https://www.redrocksonline.com/events/tucker-wetmore-1331803/"},
+  {date:"2026-10-28",artist:"Koe Wetzel",support:"Wade Bowen, Kolby Cooper",url:"https://www.redrocksonline.com/events/koe-wetzel-1345452/"},
+  {date:"2026-10-29",artist:"Cypress Hill & Method Man & Redman",support:"",url:"https://www.redrocksonline.com/events/cypress-hill-method-man-redman-haunted-rocks-1286404/"},
+  {date:"2026-11-14",artist:"mike.",support:"Stevie Daniels",url:"https://www.redrocksonline.com/events/mike-1239116/"},
+  {date:"2026-11-15",artist:"mike.",support:"Stevie Daniels",url:"https://www.redrocksonline.com/events/mike-with-opening-set-from-dj-stevie-daniels-1261297/"}
+];
+
+// Genre-adjacent artists (indie/alt-rock, post-rock, funk, folk-rock vibes)
+const GENRE_ADJACENT = [
+  "bright eyes","jason isbell","alabama shakes","lord huron","jimmy eat world",
+  "ethel cain","flipturn","big thief","bleachers","the revivalists",
+  "ray lamontagne","gregory alan isakov","brandi carlile","bob moses",
+  "the head and the heart","kaleo","amyl and the sniffers","trey anastasio",
+  "goose","the avett brothers","sublime","widespread panic","tedeschi trucks band",
+  "santana","michael franti","blues traveler","big head todd","yo-yo ma",
+  "tori amos","maren morris","american football","sunny day real estate",
+  "the get up kids","k. flay","jon bellion"
+];
+
+let inRedRocks = false;
+
+function classifyRREvent(ev) {
+  const name = ev.artist.toLowerCase();
+  const support = (ev.support||'').toLowerCase();
+  // Check exact match against user's artist list
+  for (const a of ARTISTS) {
+    const al = a.toLowerCase();
+    if (name.includes(al) || al.includes(name) || support.includes(al)) {
+      return 'onlist';
+    }
+  }
+  // Check genre adjacent
+  for (const g of GENRE_ADJACENT) {
+    if (name.includes(g) || g.includes(name)) return 'genre';
+  }
+  return 'none';
+}
+
+function showRedRocks() {
+  detailArtist = null;
+  inArtistList = false;
+  inRedRocks = true;
+  document.getElementById('redRocksBtn').classList.add('active');
+  document.getElementById('houstonBtn').classList.remove('active');
+  document.getElementById('artistsBtn').classList.remove('active');
+
+  const q = document.getElementById('search').value.toLowerCase();
+  let events = RED_ROCKS_EVENTS.filter(e => {
+    if (!q) return true;
+    return e.artist.toLowerCase().includes(q) || (e.support||'').toLowerCase().includes(q);
+  });
+
+  // Sort: onlist first, then genre, then rest, all by date within
+  const classified = events.map(e => ({...e, _class: classifyRREvent(e)}));
+  classified.sort((a,b) => {
+    const order = {onlist:0, genre:1, none:2};
+    if (order[a._class] !== order[b._class]) return order[a._class] - order[b._class];
+    return a.date.localeCompare(b.date);
+  });
+
+  const onListCount = classified.filter(e => e._class === 'onlist').length;
+  const genreCount = classified.filter(e => e._class === 'genre').length;
+
+  document.getElementById('stats').innerHTML = `
+    <span><b>${classified.length}</b> Red Rocks events</span>
+    ${onListCount ? `<span class="badge badge-redrocks">⭐ ${onListCount} on your list</span>` : ''}
+    ${genreCount ? `<span class="badge badge-genre">🎵 ${genreCount} similar vibes</span>` : ''}
+  `;
+
+  let html = `<button class="back-btn" onclick="exitRedRocks()">← Back to events</button>`;
+  html += `<div class="detail-header"><h2>🏔️ Red Rocks Amphitheatre — 2026 Season</h2>`;
+  html += `<p>Morrison, CO · All upcoming shows</p></div>`;
+  html += `<div class="rr-updated">Last updated: Mar 15, 2026 · Source: redrocksonline.com</div>`;
+
+  if (classified.length === 0) {
+    html += '<div class="no-events">No matching events</div>';
+  } else {
+    html += `<table><thead><tr>
+      <th>Date</th><th>Artist</th><th class="hide-mobile">Support</th><th>Tickets</th>
+    </tr></thead><tbody>`;
+    classified.forEach(e => {
+      const cls = e._class === 'onlist' ? ' class="rr-onlist"' : e._class === 'genre' ? ' class="rr-genre"' : '';
+      const badge = e._class === 'onlist' ? ' <span class="badge badge-redrocks">⭐ On Your List</span>' :
+                    e._class === 'genre' ? ' <span class="badge badge-genre">🎵 Similar</span>' : '';
+      const d = new Date(e.date + 'T20:00:00');
+      const dateStr = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      html += `<tr${cls}>
+        <td class="date-col">${dateStr}</td>
+        <td class="artist-name">${esc(e.artist)}${badge}</td>
+        <td class="city-name hide-mobile">${esc(e.support||'—')}</td>
+        <td><a href="${e.url}" target="_blank" class="venue-link">🎟️ Tickets</a></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+  }
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function exitRedRocks() {
+  inRedRocks = false;
+  document.getElementById('redRocksBtn').classList.remove('active');
+  renderMainView();
+}
+
+// Patch search to work with Red Rocks view
+const origSearchHandler = document.getElementById('search').oninput;
+document.getElementById('search').addEventListener('input', () => {
+  if (inRedRocks) showRedRocks();
 });
 
 (async () => {
