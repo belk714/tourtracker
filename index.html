@@ -252,6 +252,11 @@ async function fetchAllEvents() {
     document.getElementById('progress').style.width = `${(loaded/ARTISTS.length*100).toFixed(0)}%`;
   }
 
+  // Filter out past events
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  allEvents = allEvents.filter(e => new Date(e.datetime) >= now);
+
   allEvents.sort((a,b) => {
     if (a._houston !== b._houston) return a._houston ? -1 : 1;
     return new Date(a.datetime) - new Date(b.datetime);
